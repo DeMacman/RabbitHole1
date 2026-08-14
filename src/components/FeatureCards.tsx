@@ -5,7 +5,7 @@ const features = [
   {
     icon: Search,
     title: 'Search',
-    description: 'Start with any topic, person, company, or concept that sparks your curiosity.',
+    description: 'Start with any topic, person, company, or concept that sparks your curiosity',
     gradient: 'from-blue-500/20 to-blue-600/10',
     iconColor: 'text-blue-400',
     delay: 0,
@@ -13,7 +13,7 @@ const features = [
   {
     icon: GitBranch,
     title: 'Explore',
-    description: 'Discover unexpected connections and traverse an infinite web of related ideas.',
+    description: 'Discover unexpected connections and traverse an infinite web of related ideas',
     gradient: 'from-purple-500/20 to-purple-600/10',
     iconColor: 'text-purple-400',
     delay: 0.2,
@@ -21,7 +21,7 @@ const features = [
   {
     icon: Lightbulb,
     title: 'Understand',
-    description: 'Build your own knowledge universe and see how everything fits together.',
+    description: 'Build your own knowledge universe and see how everything fits together',
     gradient: 'from-pink-500/20 to-pink-600/10',
     iconColor: 'text-pink-400',
     delay: 0.4,
@@ -43,7 +43,7 @@ export default function FeatureCards() {
             How it works
           </h2>
           <p className="text-lg text-[#A1A1AA] max-w-xl mx-auto">
-            Three simple steps to transform how you explore knowledge.
+            Three simple steps to transform how you explore knowledge
           </p>
         </motion.div>
 
