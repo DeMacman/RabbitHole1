@@ -18,26 +18,61 @@ const typeColors: Record<string, string> = {
   'Space Mission': '#7C3AED',
 };
 
+type GraphNodeData = {
+  type?: string;
+  label?: string;
+  summary?: string;
+};
+
 function GraphNode({ data, selected }: NodeProps) {
-  const color = typeColors[data.type as string] || '#7C3AED';
+  const nodeData = data as GraphNodeData;
+
+  const type = nodeData.type ?? '';
+  const label = nodeData.label ?? '';
+  const summary = nodeData.summary ?? type;
+
+  const color = typeColors[type] || '#7C3AED';
 
   return (
     <div
       className={`
         relative px-4 py-2 rounded-xl border bg-[#0F0F10] backdrop-blur-sm
         transition-all duration-300 cursor-pointer
-        ${selected ? 'border-[#7C3AED] shadow-lg shadow-[#7C3AED]/30' : 'border-[rgba(255,255,255,0.08)]'}
+        ${
+          selected
+            ? 'border-[#7C3AED] shadow-lg shadow-[#7C3AED]/30'
+            : 'border-[rgba(255,255,255,0.08)]'
+        }
         hover:border-[#7C3AED]/50 hover:shadow-lg
       `}
-      title={`${data.label}\n${data.summary || data.type}`}
+      title={`${label}\n${summary}`}
     >
-      <Handle type="target" position={Position.Top} className="!bg-[#7C3AED]" />
-      <Handle type="source" position={Position.Bottom} className="!bg-[#7C3AED]" />
+      <Handle
+        type="target"
+        position={Position.Top}
+        className="!bg-[#7C3AED]"
+      />
+
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        className="!bg-[#7C3AED]"
+      />
+
       <div className="flex items-center gap-2">
-        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-        <span className="text-white text-sm font-medium">{data.label}</span>
+        <span
+          className="w-2 h-2 rounded-full"
+          style={{ backgroundColor: color }}
+        />
+
+        <span className="text-white text-sm font-medium">
+          {label}
+        </span>
       </div>
-      <div className="text-xs text-[#A1A1AA] mt-1">{data.type}</div>
+
+      <div className="text-xs text-[#A1A1AA] mt-1">
+        {type}
+      </div>
     </div>
   );
 }
