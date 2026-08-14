@@ -1,4 +1,4 @@
-export type EntityType = 
+export type EntityType =
   | 'Person'
   | 'Company'
   | 'Technology'

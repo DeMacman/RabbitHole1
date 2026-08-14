@@ -13,11 +13,18 @@ export async function getEntityBySlug(slug: string): Promise<Entity | null> {
   return entityRepo.getEntityBySlug(slug);
 }
 
-export async function listEntities(type?: string, limit = 20, offset = 0): Promise<Entity[]> {
+export async function listEntities(
+  type?: string,
+  limit = 20,
+  offset = 0
+): Promise<Entity[]> {
   return entityRepo.listEntities(type, limit, offset);
 }
 
-export async function updateEntityBySlug(slug: string, data: UpdateEntityInput): Promise<Entity | null> {
+export async function updateEntityBySlug(
+  slug: string,
+  data: UpdateEntityInput
+): Promise<Entity | null> {
   const entity = await entityRepo.getEntityBySlug(slug);
   if (!entity) throw new Error('Entity not found');
   return entityRepo.updateEntityBySlug(slug, data);
@@ -27,11 +34,15 @@ export async function deleteEntityBySlug(slug: string): Promise<boolean> {
   return entityRepo.deleteEntityBySlug(slug);
 }
 
-export async function searchEntities(params: SearchQueryInput): Promise<SearchResult[]> {
+export async function searchEntities(
+  params: SearchQueryInput & { fuzzy?: boolean }
+): Promise<SearchResult[]> {
   return entityRepo.searchEntities(params);
 }
 
-export async function getEntityGraph(slug: string): Promise<{
+export async function getEntityGraph(
+  slug: string
+): Promise<{
   center: Entity;
   nodes: Entity[];
   edges: Relationship[];
