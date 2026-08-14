@@ -30,40 +30,102 @@ interface GraphData {
   edges: any[];
 }
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function EntityDetailPage() {
   const { slug } = useParams<{ slug: string }>();
+
   const [entity, setEntity] = useState<Entity | null>(null);
   const [graph, setGraph] = useState<GraphData | null>(null);
+
   const [loading, setLoading] = useState(true);
   const [graphLoading, setGraphLoading] = useState(true);
+
   const [error, setError] = useState<string | null>(null);
 
+  /*
+   * Fetch entity details
+   */
   useEffect(() => {
-    if (!slug) return;
+    if (!slug) {
+      setError('Entity not found');
+      setLoading(false);
+      return;
+    }
+
+    if (!API_URL) {
+      setError('API URL is not configured');
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
-    fetch(`${import.meta.env.VITE_API_URL}/api/entities/${slug}`)
+    setError(null);
+
+    fetch(`${API_URL}/api/entities/${encodeURIComponent(slug)}`)
       .then((res) => {
-        if (!res.ok) throw new Error('Entity not found');
+        if (!res.ok) {
+          throw new Error('Entity not found');
+        }
+
         return res.json();
       })
-      .then((data) => setEntity(data))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+      .then((data: Entity) => {
+        setEntity(data);
+      })
+      .catch((err: unknown) => {
+        setEntity(null);
+
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('Unable to load entity');
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [slug]);
 
+  /*
+   * Fetch knowledge graph
+   */
   useEffect(() => {
-    if (!slug) return;
+    if (!slug) {
+      setGraphLoading(false);
+      return;
+    }
+
+    if (!API_URL) {
+      setGraph(null);
+      setGraphLoading(false);
+      return;
+    }
+
     setGraphLoading(true);
-    fetch(`${import.meta.env.VITE_API_URL}/api/entities/${slug}/graph`)
+
+    fetch(`${API_URL}/api/entities/${encodeURIComponent(slug)}/graph`)
       .then((res) => {
-        if (!res.ok) throw new Error('Graph not available');
+        if (!res.ok) {
+          throw new Error('Graph not available');
+        }
+
         return res.json();
       })
-      .then((data) => setGraph(data))
-      .catch(() => setGraph(null))
-      .finally(() => setGraphLoading(false));
+      .then((data: GraphData) => {
+        setGraph(data);
+      })
+      .catch(() => {
+        setGraph(null);
+      })
+      .finally(() => {
+        setGraphLoading(false);
+      });
   }, [slug]);
 
+  /*
+   * Loading state
+   */
   if (loading) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center text-white">
@@ -72,13 +134,23 @@ export default function EntityDetailPage() {
     );
   }
 
+  /*
+   * Error state
+   */
   if (error || !entity) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center text-white">
-        <div className="text-center">
-          <p className="text-xl text-red-400">Entity not found</p>
-          <a href="/" className="mt-4 inline-flex items-center text-[#7C3AED] hover:underline">
-            <ArrowLeft className="w-4 h-4 mr-2" /> Back to search
+        <div className="text-center px-6">
+          <p className="text-xl text-red-400">
+            {error || 'Entity not found'}
+          </p>
+
+          <a
+            href="/"
+            className="mt-4 inline-flex items-center text-[#7C3AED] hover:underline"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to search
           </a>
         </div>
       </div>
@@ -88,26 +160,52 @@ export default function EntityDetailPage() {
   return (
     <div className="min-h-screen bg-[#050505] text-white">
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <a href="/" className="inline-flex items-center text-[#A1A1AA] hover:text-white mb-8 transition-colors">
+
+        {/* Back button */}
+        <a
+          href="/"
+          className="inline-flex items-center text-[#A1A1AA] hover:text-white mb-8 transition-colors"
+        >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to search
         </a>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="font-display text-4xl md:text-6xl font-bold mb-4">{entity.label}</h1>
-          <p className="text-lg text-[#A1A1AA] mb-6">{entity.summary || entity.description}</p>
+        {/* Entity header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <h1 className="font-display text-4xl md:text-6xl font-bold mb-4">
+            {entity.label}
+          </h1>
 
+          <p className="text-lg text-[#A1A1AA] mb-6">
+            {entity.summary || entity.description}
+          </p>
+
+          {/* External links */}
           <div className="flex flex-wrap gap-4 mb-12">
             {entity.wikipediaUrl && (
-              <a href={entity.wikipediaUrl} target="_blank" rel="noopener noreferrer"
-                 className="flex items-center text-sm text-[#7C3AED] hover:underline">
-                <BookOpen className="w-4 h-4 mr-1" /> Wikipedia
+              <a
+                href={entity.wikipediaUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center text-sm text-[#7C3AED] hover:underline"
+              >
+                <BookOpen className="w-4 h-4 mr-1" />
+                Wikipedia
               </a>
             )}
+
             {entity.officialWebsite && (
-              <a href={entity.officialWebsite} target="_blank" rel="noopener noreferrer"
-                 className="flex items-center text-sm text-[#7C3AED] hover:underline">
-                <ExternalLink className="w-4 h-4 mr-1" /> Website
+              <a
+                href={entity.officialWebsite}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center text-sm text-[#7C3AED] hover:underline"
+              >
+                <ExternalLink className="w-4 h-4 mr-1" />
+                Website
               </a>
             )}
           </div>
@@ -120,12 +218,16 @@ export default function EntityDetailPage() {
           viewport={{ once: true, margin: '-100px' }}
           className="mt-16"
         >
-          <h2 className="text-2xl font-display font-bold mb-6">Interactive Knowledge Graph</h2>
+          <h2 className="text-2xl font-display font-bold mb-6">
+            Interactive Knowledge Graph
+          </h2>
+
           {graphLoading ? (
             <GraphLoading />
           ) : graph ? (
             <>
               <GraphLegend />
+
               <div className="mt-4">
                 <GraphCanvas data={graph} />
               </div>
@@ -140,25 +242,54 @@ export default function EntityDetailPage() {
         {/* Details */}
         <div className="grid lg:grid-cols-2 gap-8 mt-16">
           <div>
-            <h2 className="text-2xl font-display font-bold mb-6">Details</h2>
+            <h2 className="text-2xl font-display font-bold mb-6">
+              Details
+            </h2>
+
             <div className="space-y-4 text-sm text-[#A1A1AA]">
+
+              {/* Tags */}
               {entity.tags.length > 0 && (
                 <div className="flex items-center gap-2">
                   <Tag className="w-4 h-4" />
                   <span>{entity.tags.join(', ')}</span>
                 </div>
               )}
-              <p>Type: {entity.type}</p>
-              <p>Created: {new Date(entity.createdAt).toLocaleDateString()}</p>
-              {entity.socialLinks && Object.keys(entity.socialLinks).length > 0 && (
-                <div>
-                  <p className="mb-1">Social:</p>
-                  {Object.entries(entity.socialLinks).map(([platform, url]) => (
-                    <a key={platform} href={url} target="_blank" rel="noopener noreferrer"
-                       className="block text-[#7C3AED] hover:underline">{platform}</a>
-                  ))}
-                </div>
-              )}
+
+              {/* Type */}
+              <p>
+                Type: {entity.type}
+              </p>
+
+              {/* Created date */}
+              <p>
+                Created:{' '}
+                {new Date(entity.createdAt).toLocaleDateString()}
+              </p>
+
+              {/* Social links */}
+              {entity.socialLinks &&
+                Object.keys(entity.socialLinks).length > 0 && (
+                  <div>
+                    <p className="mb-1">
+                      Social:
+                    </p>
+
+                    {Object.entries(entity.socialLinks).map(
+                      ([platform, url]) => (
+                        <a
+                          key={platform}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block text-[#7C3AED] hover:underline"
+                        >
+                          {platform}
+                        </a>
+                      )
+                    )}
+                  </div>
+                )}
             </div>
           </div>
         </div>

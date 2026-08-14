@@ -21,19 +21,31 @@ export default function SearchBar() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
   const navigate = useNavigate();
+
+  // Production backend URL from Vite environment variables
+  const API_URL = import.meta.env.VITE_API_URL;
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
+
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   // Debounced search
@@ -48,17 +60,32 @@ export default function SearchBar() {
     const timer = setTimeout(async () => {
       setLoading(true);
       setError(null);
+
       try {
+        if (!API_URL) {
+          throw new Error('API URL is not configured');
+        }
+
         const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/search?q=${encodeURIComponent(query)}&limit=5`
+          `${API_URL}/api/search?q=${encodeURIComponent(query)}&limit=5`
         );
-        if (!res.ok) throw new Error('Search failed');
+
+        if (!res.ok) {
+          throw new Error(`Search failed (${res.status})`);
+        }
+
         const data: SearchResult[] = await res.json();
+
         setResults(data);
-        setIsOpen(data.length > 0);
+        setIsOpen(true);
         setSelectedIndex(-1);
-      } catch (err: any) {
-        setError(err.message || 'Something went wrong');
+      } catch (err: unknown) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : 'Something went wrong';
+
+        setError(message);
         setResults([]);
         setIsOpen(true);
       } finally {
@@ -67,13 +94,16 @@ export default function SearchBar() {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, API_URL]);
 
   const handleSelect = (slug: string) => {
     navigate(`/entity/${slug}`);
+
     setQuery('');
     setResults([]);
     setIsOpen(false);
+    setSelectedIndex(-1);
+
     inputRef.current?.blur();
   };
 
@@ -82,13 +112,23 @@ export default function SearchBar() {
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setSelectedIndex(prev => (prev < results.length - 1 ? prev + 1 : 0));
+
+      setSelectedIndex((prev) =>
+        prev < results.length - 1 ? prev + 1 : 0
+      );
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setSelectedIndex(prev => (prev > 0 ? prev - 1 : results.length - 1));
+
+      setSelectedIndex((prev) =>
+        prev > 0 ? prev - 1 : results.length - 1
+      );
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      if (selectedIndex >= 0 && selectedIndex < results.length) {
+
+      if (
+        selectedIndex >= 0 &&
+        selectedIndex < results.length
+      ) {
         handleSelect(results[selectedIndex].entity.slug);
       } else if (results.length > 0) {
         handleSelect(results[0].entity.slug);
@@ -100,17 +140,27 @@ export default function SearchBar() {
   };
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-2xl mx-auto">
+    <div
+      ref={containerRef}
+      className="relative w-full max-w-2xl mx-auto"
+    >
       {/* Search input */}
       <div className="relative flex items-center bg-[#0F0F10] border border-[rgba(255,255,255,0.08)] rounded-xl focus-within:border-[#7C3AED]/50 transition-all duration-300">
         <Search className="w-5 h-5 text-[#A1A1AA] ml-4 flex-shrink-0" />
+
         <input
           ref={inputRef}
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => {
-            if (results.length > 0 || loading || error) setIsOpen(true);
+            if (
+              results.length > 0 ||
+              loading ||
+              error
+            ) {
+              setIsOpen(true);
+            }
           }}
           onKeyDown={handleKeyDown}
           placeholder="Explore anything..."
@@ -120,13 +170,17 @@ export default function SearchBar() {
           aria-autocomplete="list"
           role="combobox"
         />
+
         {query && (
           <button
+            type="button"
             onClick={() => {
               setQuery('');
               setResults([]);
               setIsOpen(false);
               setError(null);
+              setSelectedIndex(-1);
+
               inputRef.current?.focus();
             }}
             className="p-2 text-[#A1A1AA] hover:text-white transition-colors"
@@ -147,7 +201,7 @@ export default function SearchBar() {
             transition={{ duration: 0.2 }}
             className="absolute left-0 right-0 mt-2 bg-[#0F0F10] border border-[rgba(255,255,255,0.08)] rounded-xl shadow-2xl overflow-hidden z-50"
           >
-            {/* Loading state */}
+            {/* Loading */}
             {loading && (
               <div className="flex items-center justify-center p-6 text-[#A1A1AA]">
                 <Loader2 className="w-5 h-5 animate-spin mr-2" />
@@ -155,11 +209,15 @@ export default function SearchBar() {
               </div>
             )}
 
-            {/* Error state */}
+            {/* Error */}
             {!loading && error && (
               <div className="p-6 text-center text-[#A1A1AA]">
-                <p className="text-red-400 text-sm">{error}</p>
+                <p className="text-red-400 text-sm">
+                  {error}
+                </p>
+
                 <button
+                  type="button"
                   onClick={() => {
                     setError(null);
                     setIsOpen(false);
@@ -172,45 +230,66 @@ export default function SearchBar() {
             )}
 
             {/* Empty results */}
-            {!loading && !error && results.length === 0 && query.length >= 2 && (
-              <div className="p-6 text-center text-[#A1A1AA] text-sm">
-                No results found for "<span className="text-white">{query}</span>"
-              </div>
-            )}
+            {!loading &&
+              !error &&
+              results.length === 0 &&
+              query.trim().length >= 2 && (
+                <div className="p-6 text-center text-[#A1A1AA] text-sm">
+                  No results found for{' '}
+                  <span className="text-white">
+                    "{query}"
+                  </span>
+                </div>
+              )}
 
-            {/* Results list */}
-            {!loading && !error && results.length > 0 && (
-              <ul role="listbox" className="py-2">
-                {results.map((result, index) => (
-                  <li
-                    key={result.entity.id}
-                    role="option"
-                    aria-selected={index === selectedIndex}
-                    className={`px-4 py-3 cursor-pointer transition-colors duration-150 ${
-                      index === selectedIndex
-                        ? 'bg-[#7C3AED]/20 border-l-2 border-[#7C3AED]'
-                        : 'border-l-2 border-transparent hover:bg-[rgba(255,255,255,0.05)]'
-                    }`}
-                    onClick={() => handleSelect(result.entity.slug)}
-                    onMouseEnter={() => setSelectedIndex(index)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-white font-medium">
-                        {result.entity.label}
-                      </span>
-                      <span className="text-xs text-[#A1A1AA] bg-[rgba(255,255,255,0.05)] px-2 py-0.5 rounded-full">
-                        {result.entity.type}
-                      </span>
-                    </div>
-                    {result.entity.summary && (
-                      <p className="text-sm text-[#A1A1AA] mt-1 line-clamp-1">
-                        {result.entity.summary}
-                      </p>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
+            {/* Results */}
+            {!loading &&
+              !error &&
+              results.length > 0 && (
+                <ul
+                  role="listbox"
+                  className="py-2"
+                >
+                  {results.map((result, index) => (
+                    <li
+                      key={result.entity.id}
+                      role="option"
+                      aria-selected={
+                        index === selectedIndex
+                      }
+                      className={`px-4 py-3 cursor-pointer transition-colors duration-150 ${
+                        index === selectedIndex
+                          ? 'bg-[#7C3AED]/20 border-l-2 border-[#7C3AED]'
+                          : 'border-l-2 border-transparent hover:bg-[rgba(255,255,255,0.05)]'
+                      }`}
+                      onClick={() =>
+                        handleSelect(
+                          result.entity.slug
+                        )
+                      }
+                      onMouseEnter={() =>
+                        setSelectedIndex(index)
+                      }
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-white font-medium">
+                          {result.entity.label}
+                        </span>
+
+                        <span className="text-xs text-[#A1A1AA] bg-[rgba(255,255,255,0.05)] px-2 py-0.5 rounded-full">
+                          {result.entity.type}
+                        </span>
+                      </div>
+
+                      {result.entity.summary && (
+                        <p className="text-sm text-[#A1A1AA] mt-1 line-clamp-1">
+                          {result.entity.summary}
+                        </p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
           </motion.div>
         )}
       </AnimatePresence>
