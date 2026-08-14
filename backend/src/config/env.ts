@@ -19,6 +19,8 @@ const envSchema = z.object({
 
   NEO4J_PASSWORD: z.string().min(1),
 
+  NEO4J_DATABASE: z.string().default('neo4j'),
+
   PORT: z.coerce.number().default(3001),
 
   LOG_LEVEL: z.string().default('info'),
