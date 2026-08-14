@@ -30,39 +30,25 @@ interface GraphData {
   edges: any[];
 }
 
-const API_URL = import.meta.env.VITE_API_URL;
-
 export default function EntityDetailPage() {
   const { slug } = useParams<{ slug: string }>();
 
   const [entity, setEntity] = useState<Entity | null>(null);
   const [graph, setGraph] = useState<GraphData | null>(null);
-
   const [loading, setLoading] = useState(true);
   const [graphLoading, setGraphLoading] = useState(true);
-
   const [error, setError] = useState<string | null>(null);
 
-  /*
-   * Fetch entity details
-   */
-  useEffect(() => {
-    if (!slug) {
-      setError('Entity not found');
-      setLoading(false);
-      return;
-    }
+  const apiUrl =
+    import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-    if (!API_URL) {
-      setError('API URL is not configured');
-      setLoading(false);
-      return;
-    }
+  useEffect(() => {
+    if (!slug) return;
 
     setLoading(true);
     setError(null);
 
-    fetch(`${API_URL}/api/entities/${encodeURIComponent(slug)}`)
+    fetch(`${apiUrl}/api/entities/${slug}`)
       .then((res) => {
         if (!res.ok) {
           throw new Error('Entity not found');
@@ -70,41 +56,23 @@ export default function EntityDetailPage() {
 
         return res.json();
       })
-      .then((data: Entity) => {
+      .then((data) => {
         setEntity(data);
       })
-      .catch((err: unknown) => {
-        setEntity(null);
-
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError('Unable to load entity');
-        }
+      .catch((err) => {
+        setError(err.message);
       })
       .finally(() => {
         setLoading(false);
       });
-  }, [slug]);
+  }, [slug, apiUrl]);
 
-  /*
-   * Fetch knowledge graph
-   */
   useEffect(() => {
-    if (!slug) {
-      setGraphLoading(false);
-      return;
-    }
-
-    if (!API_URL) {
-      setGraph(null);
-      setGraphLoading(false);
-      return;
-    }
+    if (!slug) return;
 
     setGraphLoading(true);
 
-    fetch(`${API_URL}/api/entities/${encodeURIComponent(slug)}/graph`)
+    fetch(`${apiUrl}/api/entities/${slug}/graph`)
       .then((res) => {
         if (!res.ok) {
           throw new Error('Graph not available');
@@ -112,7 +80,7 @@ export default function EntityDetailPage() {
 
         return res.json();
       })
-      .then((data: GraphData) => {
+      .then((data) => {
         setGraph(data);
       })
       .catch(() => {
@@ -121,11 +89,8 @@ export default function EntityDetailPage() {
       .finally(() => {
         setGraphLoading(false);
       });
-  }, [slug]);
+  }, [slug, apiUrl]);
 
-  /*
-   * Loading state
-   */
   if (loading) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center text-white">
@@ -134,15 +99,12 @@ export default function EntityDetailPage() {
     );
   }
 
-  /*
-   * Error state
-   */
   if (error || !entity) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center text-white">
-        <div className="text-center px-6">
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center text-white px-4">
+        <div className="text-center">
           <p className="text-xl text-red-400">
-            {error || 'Entity not found'}
+            Entity not found
           </p>
 
           <a
@@ -158,33 +120,35 @@ export default function EntityDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white">
-      <div className="max-w-7xl mx-auto px-6 py-12">
+    <div className="min-h-screen bg-[#050505] text-white overflow-x-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
 
         {/* Back button */}
         <a
           href="/"
-          className="inline-flex items-center text-[#A1A1AA] hover:text-white mb-8 transition-colors"
+          className="inline-flex items-center text-[#A1A1AA] hover:text-white mb-6 sm:mb-8 transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to search
         </a>
 
-        {/* Entity header */}
+        {/* Entity Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <h1 className="font-display text-4xl md:text-6xl font-bold mb-4">
+          <h1 className="font-display text-3xl sm:text-4xl md:text-6xl font-bold mb-4 break-words">
             {entity.label}
           </h1>
 
-          <p className="text-lg text-[#A1A1AA] mb-6">
-            {entity.summary || entity.description}
-          </p>
+          {(entity.summary || entity.description) && (
+            <p className="text-base sm:text-lg text-[#A1A1AA] mb-6 break-words leading-relaxed">
+              {entity.summary || entity.description}
+            </p>
+          )}
 
           {/* External links */}
-          <div className="flex flex-wrap gap-4 mb-12">
+          <div className="flex flex-wrap gap-3 sm:gap-4 mb-8 sm:mb-12">
             {entity.wikipediaUrl && (
               <a
                 href={entity.wikipediaUrl}
@@ -216,9 +180,9 @@ export default function EntityDetailPage() {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true, margin: '-100px' }}
-          className="mt-16"
+          className="mt-10 sm:mt-16"
         >
-          <h2 className="text-2xl font-display font-bold mb-6">
+          <h2 className="text-xl sm:text-2xl font-display font-bold mb-4 sm:mb-6">
             Interactive Knowledge Graph
           </h2>
 
@@ -228,40 +192,43 @@ export default function EntityDetailPage() {
             <>
               <GraphLegend />
 
-              <div className="mt-4">
+              <div className="mt-4 w-full min-w-0 overflow-hidden">
                 <GraphCanvas data={graph} />
               </div>
             </>
           ) : (
-            <div className="p-8 bg-[#0F0F10] border border-[rgba(255,255,255,0.08)] rounded-2xl text-center text-[#A1A1AA]">
+            <div className="p-6 sm:p-8 bg-[#0F0F10] border border-[rgba(255,255,255,0.08)] rounded-2xl text-center text-[#A1A1AA]">
               No connections found for this entity.
             </div>
           )}
         </motion.section>
 
         {/* Details */}
-        <div className="grid lg:grid-cols-2 gap-8 mt-16">
+        <div className="grid lg:grid-cols-2 gap-8 mt-12 sm:mt-16">
           <div>
-            <h2 className="text-2xl font-display font-bold mb-6">
+            <h2 className="text-xl sm:text-2xl font-display font-bold mb-4 sm:mb-6">
               Details
             </h2>
 
-            <div className="space-y-4 text-sm text-[#A1A1AA]">
+            <div className="space-y-3 sm:space-y-4 text-sm text-[#A1A1AA]">
 
               {/* Tags */}
               {entity.tags.length > 0 && (
-                <div className="flex items-center gap-2">
-                  <Tag className="w-4 h-4" />
-                  <span>{entity.tags.join(', ')}</span>
+                <div className="flex items-start gap-2 flex-wrap">
+                  <Tag className="w-4 h-4 flex-shrink-0 mt-0.5" />
+
+                  <span className="break-words">
+                    {entity.tags.join(', ')}
+                  </span>
                 </div>
               )}
 
               {/* Type */}
-              <p>
+              <p className="break-words">
                 Type: {entity.type}
               </p>
 
-              {/* Created date */}
+              {/* Created */}
               <p>
                 Created:{' '}
                 {new Date(entity.createdAt).toLocaleDateString()}
@@ -282,7 +249,7 @@ export default function EntityDetailPage() {
                           href={url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="block text-[#7C3AED] hover:underline"
+                          className="block text-[#7C3AED] hover:underline break-words"
                         >
                           {platform}
                         </a>
@@ -293,6 +260,7 @@ export default function EntityDetailPage() {
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );
