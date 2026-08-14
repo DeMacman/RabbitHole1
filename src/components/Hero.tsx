@@ -27,7 +27,7 @@ export default function Hero() {
           Explore knowledge,
           <br />
           <span className="bg-gradient-to-r from-[#7C3AED] to-purple-400 bg-clip-text text-transparent">
-            not search results.
+            not search results
           </span>
         </motion.h1>
 

@@ -70,7 +70,7 @@ const VisionSection = () => {
             transition={{ duration: 0.8 }}
           >
             <h2 className="font-display mb-6 text-4xl font-bold text-white md:text-5xl">
-              Every search becomes a universe.
+              Every search becomes a universe
             </h2>
 
             <p className="mb-8 text-lg leading-relaxed text-[#A1A1AA]">
