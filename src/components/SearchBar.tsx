@@ -50,7 +50,7 @@ export default function SearchBar() {
       setError(null);
       try {
         const res = await fetch(
-          `http://localhost:3001/api/search?q=${encodeURIComponent(query)}&limit=5`
+          `${import.meta.env.VITE_API_URL}/api/search?q=${encodeURIComponent(query)}&limit=5`
         );
         if (!res.ok) throw new Error('Search failed');
         const data: SearchResult[] = await res.json();

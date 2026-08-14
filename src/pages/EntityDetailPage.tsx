@@ -41,7 +41,7 @@ export default function EntityDetailPage() {
   useEffect(() => {
     if (!slug) return;
     setLoading(true);
-    fetch(`http://localhost:3001/api/entities/${slug}`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/entities/${slug}`)
       .then((res) => {
         if (!res.ok) throw new Error('Entity not found');
         return res.json();
@@ -54,7 +54,7 @@ export default function EntityDetailPage() {
   useEffect(() => {
     if (!slug) return;
     setGraphLoading(true);
-    fetch(`http://localhost:3001/api/entities/${slug}/graph`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/entities/${slug}/graph`)
       .then((res) => {
         if (!res.ok) throw new Error('Graph not available');
         return res.json();
