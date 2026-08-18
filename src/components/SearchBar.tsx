@@ -14,6 +14,23 @@ interface SearchResult {
   score: number;
 }
 
+const typeColors: Record<string, string> = {
+  Person: '#c47a4f',
+  Company: '#3e6a4f',
+  Technology: '#685391',
+  Concept: '#8069ad',
+  Organization: '#3e7c7b',
+  Book: '#b4564b',
+  Movie: '#c47a4f',
+  Country: '#5d856d',
+  City: '#3e7c7b',
+  University: '#2e543e',
+  'Programming Language': '#685391',
+  Paper: '#8069ad',
+  'Historical Event': '#b4564b',
+  'Space Mission': '#23422f',
+};
+
 export default function SearchBar() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -100,8 +117,8 @@ export default function SearchBar() {
 
   return (
     <div ref={containerRef} className="relative w-full max-w-2xl mx-auto px-4 sm:px-0">
-      <div className="relative flex items-center bg-white/90 border border-navy-800/15 rounded-2xl focus-within:border-forest-500/60 focus-within:ring-2 focus-within:ring-forest-400/20 transition-all duration-300 shadow-soft">
-        <Search className="w-5 h-5 text-navy-700/70 ml-4 flex-shrink-0" />
+      <div className="relative flex items-center bg-white/90 border border-navy-800/10 rounded-2xl focus-within:border-forest-500/60 focus-within:ring-2 focus-within:ring-forest-400/20 transition-all duration-300 shadow-soft">
+        <Search className="w-5 h-5 text-navy-700/50 ml-4 flex-shrink-0" />
         <input
           ref={inputRef}
           type="text"
@@ -112,7 +129,7 @@ export default function SearchBar() {
           }}
           onKeyDown={handleKeyDown}
           placeholder="Explore anything..."
-          className="flex-1 bg-transparent px-4 py-3.5 sm:py-4 text-navy-900 placeholder-navy-700/50 focus:outline-none font-sans text-sm sm:text-base min-w-0"
+          className="flex-1 bg-transparent px-4 py-3.5 sm:py-4 text-navy-900 placeholder-navy-700/40 focus:outline-none font-sans text-sm sm:text-base min-w-0"
           aria-label="Search knowledge graph"
           aria-expanded={isOpen}
           aria-autocomplete="list"
@@ -127,7 +144,7 @@ export default function SearchBar() {
               setError(null);
               inputRef.current?.focus();
             }}
-            className="p-2 text-navy-700/60 hover:text-navy-900 transition-colors mr-1"
+            className="p-2 text-navy-700/50 hover:text-navy-900 transition-colors mr-1"
             aria-label="Clear search"
           >
             <X className="w-4 h-4" />
@@ -145,14 +162,14 @@ export default function SearchBar() {
             className="absolute left-4 right-4 sm:left-0 sm:right-0 mt-2 bg-white border border-navy-800/10 rounded-2xl shadow-lift overflow-hidden z-50 max-h-80 overflow-y-auto"
           >
             {loading && (
-              <div className="flex items-center justify-center p-6 text-navy-700/70">
+              <div className="flex items-center justify-center p-6 text-navy-700/60">
                 <Loader2 className="w-5 h-5 animate-spin mr-2" />
                 Searching...
               </div>
             )}
 
             {!loading && error && (
-              <div className="p-6 text-center text-navy-700/70">
+              <div className="p-6 text-center text-navy-700/60">
                 <p className="text-red-500 text-sm">{error}</p>
                 <button
                   onClick={() => {
@@ -167,41 +184,48 @@ export default function SearchBar() {
             )}
 
             {!loading && !error && results.length === 0 && query.length >= 2 && (
-              <div className="p-6 text-center text-navy-700/70 text-sm">
+              <div className="p-6 text-center text-navy-700/60 text-sm">
                 No results found for "<span className="text-navy-900">{query}</span>"
               </div>
             )}
 
             {!loading && !error && results.length > 0 && (
               <ul role="listbox" className="py-2">
-                {results.map((result, index) => (
-                  <li
-                    key={result.entity.id}
-                    role="option"
-                    aria-selected={index === selectedIndex}
-                    className={`px-4 py-3 cursor-pointer transition-colors duration-150 ${
-                      index === selectedIndex
-                        ? 'bg-forest-500/10 border-l-2 border-forest-500'
-                        : 'border-l-2 border-transparent hover:bg-cream-100'
-                    }`}
-                    onClick={() => handleSelect(result.entity.slug)}
-                    onMouseEnter={() => setSelectedIndex(index)}
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-navy-900 font-medium break-words">
-                        {result.entity.label}
-                      </span>
-                      <span className="text-xs text-forest-700 bg-forest-500/10 px-2 py-0.5 rounded-full flex-shrink-0">
-                        {result.entity.type}
-                      </span>
-                    </div>
-                    {result.entity.summary && (
-                      <p className="text-sm text-navy-700/70 mt-1 line-clamp-2 break-words">
-                        {result.entity.summary}
-                      </p>
-                    )}
-                  </li>
-                ))}
+                {results.map((result, index) => {
+                  const dotColor = typeColors[result.entity.type] || '#3e6a4f';
+                  return (
+                    <li
+                      key={result.entity.id}
+                      role="option"
+                      aria-selected={index === selectedIndex}
+                      className={`px-4 py-3 cursor-pointer transition-colors duration-150 ${
+                        index === selectedIndex
+                          ? 'bg-forest-500/10 border-l-2 border-forest-500'
+                          : 'border-l-2 border-transparent hover:bg-cream-100'
+                      }`}
+                      onClick={() => handleSelect(result.entity.slug)}
+                      onMouseEnter={() => setSelectedIndex(index)}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-navy-900 font-medium break-words flex items-center gap-2">
+                          <span
+                            className="w-2 h-2 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: dotColor }}
+                          />
+                          {result.entity.label}
+                        </span>
+                        <span className="text-[10px] sm:text-xs text-forest-700 bg-forest-500/10 px-2 py-0.5 rounded-full flex-shrink-0">
+                          {result.entity.type}
+                        </span>
+                      </div>
+                      {result.entity.summary && (
+                        <p className="text-sm text-navy-700/60 mt-1 line-clamp-2 break-words">
+                          {result.entity.summary}
+                        </p>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </motion.div>

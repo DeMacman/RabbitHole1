@@ -32,87 +32,54 @@ interface GraphData {
 
 export default function EntityDetailPage() {
   const { slug } = useParams<{ slug: string }>();
-
   const [entity, setEntity] = useState<Entity | null>(null);
   const [graph, setGraph] = useState<GraphData | null>(null);
   const [loading, setLoading] = useState(true);
   const [graphLoading, setGraphLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const apiUrl =
-    import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
   useEffect(() => {
     if (!slug) return;
-
     setLoading(true);
-    setError(null);
-
     fetch(`${apiUrl}/api/entities/${slug}`)
       .then((res) => {
-        if (!res.ok) {
-          throw new Error('Entity not found');
-        }
-
+        if (!res.ok) throw new Error('Entity not found');
         return res.json();
       })
-      .then((data) => {
-        setEntity(data);
-      })
-      .catch((err) => {
-        setError(err.message);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      .then((data) => setEntity(data))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
   }, [slug, apiUrl]);
 
   useEffect(() => {
     if (!slug) return;
-
     setGraphLoading(true);
-
     fetch(`${apiUrl}/api/entities/${slug}/graph`)
       .then((res) => {
-        if (!res.ok) {
-          throw new Error('Graph not available');
-        }
-
+        if (!res.ok) throw new Error('Graph not available');
         return res.json();
       })
-      .then((data) => {
-        setGraph(data);
-      })
-      .catch(() => {
-        setGraph(null);
-      })
-      .finally(() => {
-        setGraphLoading(false);
-      });
+      .then((data) => setGraph(data))
+      .catch(() => setGraph(null))
+      .finally(() => setGraphLoading(false));
   }, [slug, apiUrl]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center text-white">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#7C3AED]" />
+      <div className="min-h-screen bg-cream-100 flex items-center justify-center text-navy-900">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-forest-600" />
       </div>
     );
   }
 
   if (error || !entity) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center text-white px-4">
+      <div className="min-h-screen bg-cream-100 flex items-center justify-center text-navy-900">
         <div className="text-center">
-          <p className="text-xl text-red-400">
-            Entity not found
-          </p>
-
-          <a
-            href="/"
-            className="mt-4 inline-flex items-center text-[#7C3AED] hover:underline"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to search
+          <p className="text-xl text-red-500">Entity not found</p>
+          <a href="/" className="mt-4 inline-flex items-center text-forest-600 hover:underline">
+            <ArrowLeft className="w-4 h-4 mr-2" /> Back to search
           </a>
         </div>
       </div>
@@ -120,147 +87,147 @@ export default function EntityDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white overflow-x-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-
-        {/* Back button */}
+    <div className="min-h-screen bg-cream-100 text-navy-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         <a
           href="/"
-          className="inline-flex items-center text-[#A1A1AA] hover:text-white mb-6 sm:mb-8 transition-colors"
+          className="inline-flex items-center text-navy-700/70 hover:text-forest-700 mb-6 sm:mb-8 transition-colors text-sm"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
+          <ArrowLeft className="w-4 h-4 mr-1.5" />
           Back to search
         </a>
 
-        {/* Entity Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <h1 className="font-display text-3xl sm:text-4xl md:text-6xl font-bold mb-4 break-words">
-            {entity.label}
-          </h1>
-
-          {(entity.summary || entity.description) && (
-            <p className="text-base sm:text-lg text-[#A1A1AA] mb-6 break-words leading-relaxed">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+          {/* Editorial header */}
+          <div className="max-w-4xl">
+            <p className="text-xs sm:text-sm uppercase tracking-[0.2em] text-forest-600 mb-2">
+              {entity.type}
+            </p>
+            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-semibold text-navy-900 leading-tight mb-4 break-words">
+              {entity.label}
+            </h1>
+            <p className="text-base sm:text-lg text-navy-700/80 leading-relaxed max-w-3xl break-words">
               {entity.summary || entity.description}
             </p>
-          )}
+          </div>
 
           {/* External links */}
-          <div className="flex flex-wrap gap-3 sm:gap-4 mb-8 sm:mb-12">
+          <div className="flex flex-wrap gap-4 mt-6 mb-10">
             {entity.wikipediaUrl && (
               <a
                 href={entity.wikipediaUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center text-sm text-[#7C3AED] hover:underline"
+                className="inline-flex items-center gap-2 text-sm text-forest-600 hover:text-forest-700 transition-colors"
               >
-                <BookOpen className="w-4 h-4 mr-1" />
+                <BookOpen className="w-4 h-4" />
                 Wikipedia
+                <ExternalLink className="w-3 h-3 text-navy-700/50" />
               </a>
             )}
-
             {entity.officialWebsite && (
               <a
                 href={entity.officialWebsite}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center text-sm text-[#7C3AED] hover:underline"
+                className="inline-flex items-center gap-2 text-sm text-forest-600 hover:text-forest-700 transition-colors"
               >
-                <ExternalLink className="w-4 h-4 mr-1" />
-                Website
+                <ExternalLink className="w-4 h-4" />
+                Official Website
+                <ExternalLink className="w-3 h-3 text-navy-700/50" />
               </a>
             )}
           </div>
         </motion.div>
 
-        {/* Interactive Knowledge Graph */}
-        <motion.section
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, margin: '-100px' }}
-          className="mt-10 sm:mt-16"
-        >
-          <h2 className="text-xl sm:text-2xl font-display font-bold mb-4 sm:mb-6">
-            Interactive Knowledge Graph
-          </h2>
-
-          {graphLoading ? (
-            <GraphLoading />
-          ) : graph ? (
-            <>
-              <GraphLegend />
-
-              <div className="mt-4 w-full min-w-0 overflow-hidden">
-                <GraphCanvas data={graph} />
-              </div>
-            </>
-          ) : (
-            <div className="p-6 sm:p-8 bg-[#0F0F10] border border-[rgba(255,255,255,0.08)] rounded-2xl text-center text-[#A1A1AA]">
-              No connections found for this entity.
-            </div>
-          )}
-        </motion.section>
-
-        {/* Details */}
-        <div className="grid lg:grid-cols-2 gap-8 mt-12 sm:mt-16">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-display font-bold mb-4 sm:mb-6">
-              Details
-            </h2>
-
-            <div className="space-y-3 sm:space-y-4 text-sm text-[#A1A1AA]">
-
-              {/* Tags */}
-              {entity.tags.length > 0 && (
-                <div className="flex items-start gap-2 flex-wrap">
-                  <Tag className="w-4 h-4 flex-shrink-0 mt-0.5" />
-
-                  <span className="break-words">
-                    {entity.tags.join(', ')}
-                  </span>
+        {/* Main content: left info, right graph */}
+        <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-8 items-start mt-4">
+          {/* Left: details and information */}
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.5 }}
+            className="space-y-6"
+          >
+            <div className="bg-white border border-navy-800/10 rounded-card p-6 shadow-soft">
+              <h2 className="font-display text-xl sm:text-2xl font-semibold text-navy-900 mb-4">
+                Details
+              </h2>
+              <dl className="space-y-3 text-sm text-navy-700/80">
+                <div>
+                  <dt className="text-navy-700/50 uppercase text-xs tracking-wide">Type</dt>
+                  <dd className="mt-0.5">{entity.type}</dd>
                 </div>
-              )}
-
-              {/* Type */}
-              <p className="break-words">
-                Type: {entity.type}
-              </p>
-
-              {/* Created */}
-              <p>
-                Created:{' '}
-                {new Date(entity.createdAt).toLocaleDateString()}
-              </p>
-
-              {/* Social links */}
-              {entity.socialLinks &&
-                Object.keys(entity.socialLinks).length > 0 && (
+                <div>
+                  <dt className="text-navy-700/50 uppercase text-xs tracking-wide">Created</dt>
+                  <dd className="mt-0.5">{new Date(entity.createdAt).toLocaleDateString()}</dd>
+                </div>
+                {entity.tags.length > 0 && (
                   <div>
-                    <p className="mb-1">
-                      Social:
-                    </p>
-
-                    {Object.entries(entity.socialLinks).map(
-                      ([platform, url]) => (
+                    <dt className="text-navy-700/50 uppercase text-xs tracking-wide mb-2">Tags</dt>
+                    <dd className="flex flex-wrap gap-2">
+                      {entity.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-cream-100 border border-navy-800/10 text-xs text-navy-700"
+                        >
+                          <Tag className="w-3 h-3 text-forest-600" />
+                          {tag}
+                        </span>
+                      ))}
+                    </dd>
+                  </div>
+                )}
+                {entity.socialLinks && Object.keys(entity.socialLinks).length > 0 && (
+                  <div>
+                    <dt className="text-navy-700/50 uppercase text-xs tracking-wide mb-2">Social</dt>
+                    <dd className="space-y-1">
+                      {Object.entries(entity.socialLinks).map(([platform, url]) => (
                         <a
                           key={platform}
                           href={url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="block text-[#7C3AED] hover:underline break-words"
+                          className="block text-forest-600 hover:text-forest-700 hover:underline break-words"
                         >
                           {platform}
                         </a>
-                      )
-                    )}
+                      ))}
+                    </dd>
                   </div>
                 )}
+              </dl>
             </div>
-          </div>
-        </div>
+          </motion.div>
 
+          {/* Right: knowledge graph */}
+          <motion.div
+            initial={{ opacity: 0, x: 10 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.5 }}
+            className="w-full min-w-0"
+          >
+            <h2 className="font-display text-xl sm:text-2xl font-semibold text-navy-900 mb-4">
+              Interactive Knowledge Graph
+            </h2>
+            {graphLoading ? (
+              <GraphLoading />
+            ) : graph ? (
+              <>
+                <GraphLegend />
+                <div className="mt-4">
+                  <GraphCanvas data={graph} />
+                </div>
+              </>
+            ) : (
+              <div className="p-6 sm:p-8 bg-white border border-navy-800/10 rounded-card text-center text-navy-700/70">
+                No connections found for this entity.
+              </div>
+            )}
+          </motion.div>
+        </div>
       </div>
     </div>
   );
