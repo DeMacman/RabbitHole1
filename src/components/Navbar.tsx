@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import Button from './Button';
 
-// Simple SVG GitHub icon
 function GithubIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -56,17 +55,17 @@ export default function Navbar() {
       transition={{ duration: 0.6, ease: 'easeOut' }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-[#050505]/80 backdrop-blur-xl border-b border-[rgba(255,255,255,0.08)]'
+          ? 'bg-cream-100/85 backdrop-blur-xl border-b border-navy-800/10 shadow-soft'
           : 'bg-transparent'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-14 sm:h-16">
+        <div className="flex items-center justify-between h-16 sm:h-18">
           <a href="/" className="flex items-center space-x-2 group">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#7C3AED]/20 border border-[#7C3AED]/30 flex items-center justify-center group-hover:bg-[#7C3AED]/30 transition-colors duration-300">
-              <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-[#7C3AED]" />
+            <div className="w-8 h-8 rounded-lg bg-forest-500/10 border border-forest-500/30 flex items-center justify-center group-hover:bg-forest-500/20 transition-colors duration-300">
+              <div className="w-4 h-4 rounded-full bg-forest-600" />
             </div>
-            <span className="font-display text-base sm:text-lg font-semibold text-white">
+            <span className="font-display text-lg sm:text-xl font-semibold text-navy-900">
               RabbitHole
             </span>
           </a>
@@ -76,7 +75,7 @@ export default function Navbar() {
               <a
                 key={link.href}
                 href={link.href}
-                className="text-sm text-[#A1A1AA] hover:text-white transition-colors duration-200"
+                className="text-sm text-navy-700 hover:text-forest-700 transition-colors duration-200"
               >
                 {link.label}
               </a>
@@ -88,19 +87,19 @@ export default function Navbar() {
               href="https://github.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 text-[#A1A1AA] hover:text-white transition-colors duration-200"
+              className="p-2 text-navy-700 hover:text-forest-700 transition-colors duration-200"
               aria-label="GitHub"
             >
               <GithubIcon className="w-5 h-5" />
             </a>
-            <Button variant="secondary" size="sm">
-              Join Waitlist
+            <Button variant="primary" size="sm">
+              Start Exploring
             </Button>
           </div>
 
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 text-[#A1A1AA] hover:text-white transition-colors"
+            className="md:hidden p-2 text-navy-700 hover:text-forest-700 transition-colors"
             aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
           >
             {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -115,7 +114,7 @@ export default function Navbar() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="md:hidden bg-[#0F0F10] border-t border-[rgba(255,255,255,0.08)] overflow-hidden"
+            className="md:hidden bg-cream-100 border-t border-navy-800/10 overflow-hidden"
           >
             <div className="px-6 py-4 space-y-4">
               {navLinks.map((link) => (
@@ -123,23 +122,23 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="block text-sm text-[#A1A1AA] hover:text-white transition-colors py-2"
+                  className="block text-sm text-navy-700 hover:text-forest-700 transition-colors py-2"
                 >
                   {link.label}
                 </a>
               ))}
-              <div className="pt-4 border-t border-[rgba(255,255,255,0.08)]">
+              <div className="pt-4 border-t border-navy-800/10">
                 <a
                   href="https://github.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-sm text-[#A1A1AA] hover:text-white transition-colors py-2 mb-4"
+                  className="flex items-center space-x-2 text-sm text-navy-700 hover:text-forest-700 transition-colors py-2 mb-4"
                 >
                   <GithubIcon className="w-4 h-4" />
                   <span>GitHub</span>
                 </a>
-                <Button variant="secondary" className="w-full">
-                  Join Waitlist
+                <Button variant="primary" className="w-full">
+                  Start Exploring
                 </Button>
               </div>
             </div>
