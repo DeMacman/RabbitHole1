@@ -11,7 +11,7 @@ import EntityDetailPage from './pages/EntityDetailPage';
 function App() {
   return (
     <BrowserRouter>
-      <div className="relative min-h-screen bg-[#050505]">
+      <div className="relative min-h-screen bg-cream-100">
         <ParticleBackground />
         <Navbar />
         <Routes>
