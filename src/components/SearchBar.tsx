@@ -40,6 +40,8 @@ export default function SearchBar() {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const requestIdRef = useRef(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,43 +55,80 @@ export default function SearchBar() {
   }, []);
 
   useEffect(() => {
-    if (query.trim().length < 2) {
+    const currentQuery = query.trim();
+
+    if (currentQuery.length < 2) {
+      abortControllerRef.current?.abort();
+      abortControllerRef.current = null;
+      requestIdRef.current += 1;
       setResults([]);
       setIsOpen(false);
       setError(null);
+      setLoading(false);
       return;
     }
+
+    const controller = new AbortController();
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = controller;
+
+    const currentRequestId = ++requestIdRef.current;
 
     const timer = setTimeout(async () => {
       setLoading(true);
       setError(null);
+
       try {
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
         const res = await fetch(
-          `${apiUrl}/api/search?q=${encodeURIComponent(query)}&limit=5`
+          `${apiUrl}/api/search?q=${encodeURIComponent(currentQuery)}&limit=5`,
+          { signal: controller.signal }
         );
+
         if (!res.ok) throw new Error('Search failed');
+
         const data: SearchResult[] = await res.json();
+
+        // Prevent stale responses from overwriting newer results
+        if (requestIdRef.current !== currentRequestId) return;
+
         setResults(data);
         setIsOpen(data.length > 0);
         setSelectedIndex(-1);
       } catch (err: any) {
+        // Ignore abort errors
+        if (err.name === 'AbortError' || err.name === 'DOMException') return;
+
+        if (requestIdRef.current !== currentRequestId) return;
+
         setError(err.message || 'Something went wrong');
         setResults([]);
         setIsOpen(true);
       } finally {
-        setLoading(false);
+        if (requestIdRef.current === currentRequestId) {
+          setLoading(false);
+        }
       }
     }, 300);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [query]);
+
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
 
   const handleSelect = (slug: string) => {
     navigate(`/entity/${slug}`);
     setQuery('');
     setResults([]);
     setIsOpen(false);
+    setError(null);
     inputRef.current?.blur();
   };
 
@@ -116,9 +155,9 @@ export default function SearchBar() {
   };
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-2xl mx-auto px-4 sm:px-0">
+    <div ref={containerRef} className="relative w-full max-w-2xl mx-auto px-2 sm:px-0">
       <div className="relative flex items-center bg-white/90 border border-navy-800/10 rounded-2xl focus-within:border-forest-500/60 focus-within:ring-2 focus-within:ring-forest-400/20 transition-all duration-300 shadow-soft">
-        <Search className="w-5 h-5 text-navy-700/50 ml-4 flex-shrink-0" />
+        <Search className="w-5 h-5 text-navy-700/50 ml-3 sm:ml-4 flex-shrink-0" />
         <input
           ref={inputRef}
           type="text"
@@ -129,7 +168,7 @@ export default function SearchBar() {
           }}
           onKeyDown={handleKeyDown}
           placeholder="Explore anything..."
-          className="flex-1 bg-transparent px-4 py-3.5 sm:py-4 text-navy-900 placeholder-navy-700/40 focus:outline-none font-sans text-sm sm:text-base min-w-0"
+          className="flex-1 bg-transparent px-3 sm:px-4 py-3 sm:py-4 text-navy-900 placeholder-navy-700/40 focus:outline-none font-sans text-sm sm:text-base min-w-0"
           aria-label="Search knowledge graph"
           aria-expanded={isOpen}
           aria-autocomplete="list"
@@ -159,7 +198,7 @@ export default function SearchBar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.2 }}
-            className="absolute left-4 right-4 sm:left-0 sm:right-0 mt-2 bg-white border border-navy-800/10 rounded-2xl shadow-lift overflow-hidden z-50 max-h-80 overflow-y-auto"
+            className="absolute left-2 right-2 sm:left-0 sm:right-0 mt-2 bg-white border border-navy-800/10 rounded-2xl shadow-lift overflow-hidden z-50 max-h-[70vh] sm:max-h-80 overflow-y-auto"
           >
             {loading && (
               <div className="flex items-center justify-center p-6 text-navy-700/60">
@@ -198,7 +237,7 @@ export default function SearchBar() {
                       key={result.entity.id}
                       role="option"
                       aria-selected={index === selectedIndex}
-                      className={`px-4 py-3 cursor-pointer transition-colors duration-150 ${
+                      className={`px-3 sm:px-4 py-3 cursor-pointer transition-colors duration-150 ${
                         index === selectedIndex
                           ? 'bg-forest-500/10 border-l-2 border-forest-500'
                           : 'border-l-2 border-transparent hover:bg-cream-100'
@@ -207,7 +246,7 @@ export default function SearchBar() {
                       onMouseEnter={() => setSelectedIndex(index)}
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-navy-900 font-medium break-words flex items-center gap-2">
+                        <span className="text-navy-900 font-medium break-words flex items-center gap-2 text-sm sm:text-base">
                           <span
                             className="w-2 h-2 rounded-full flex-shrink-0"
                             style={{ backgroundColor: dotColor }}
@@ -219,7 +258,7 @@ export default function SearchBar() {
                         </span>
                       </div>
                       {result.entity.summary && (
-                        <p className="text-sm text-navy-700/60 mt-1 line-clamp-2 break-words">
+                        <p className="text-xs sm:text-sm text-navy-700/60 mt-1 line-clamp-2 break-words">
                           {result.entity.summary}
                         </p>
                       )}
