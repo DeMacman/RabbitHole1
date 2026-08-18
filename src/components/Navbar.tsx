@@ -60,12 +60,12 @@ export default function Navbar() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-16 sm:h-18">
+        <div className="flex items-center justify-between h-14 sm:h-16">
           <a href="/" className="flex items-center space-x-2 group">
-            <div className="w-8 h-8 rounded-lg bg-forest-500/10 border border-forest-500/30 flex items-center justify-center group-hover:bg-forest-500/20 transition-colors duration-300">
-              <div className="w-4 h-4 rounded-full bg-forest-600" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-forest-500/10 border border-forest-500/30 flex items-center justify-center group-hover:bg-forest-500/20 transition-colors duration-300">
+              <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-forest-600" />
             </div>
-            <span className="font-display text-lg sm:text-xl font-semibold text-navy-900">
+            <span className="font-display text-base sm:text-lg font-semibold text-navy-900">
               RabbitHole
             </span>
           </a>
@@ -116,7 +116,7 @@ export default function Navbar() {
             transition={{ duration: 0.3 }}
             className="md:hidden bg-cream-100 border-t border-navy-800/10 overflow-hidden"
           >
-            <div className="px-6 py-4 space-y-4">
+            <div className="px-4 sm:px-6 py-4 space-y-3">
               {navLinks.map((link) => (
                 <a
                   key={link.href}
@@ -127,12 +127,12 @@ export default function Navbar() {
                   {link.label}
                 </a>
               ))}
-              <div className="pt-4 border-t border-navy-800/10">
+              <div className="pt-3 border-t border-navy-800/10">
                 <a
                   href="https://github.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-sm text-navy-700 hover:text-forest-700 transition-colors py-2 mb-4"
+                  className="flex items-center space-x-2 text-sm text-navy-700 hover:text-forest-700 transition-colors py-2 mb-3"
                 >
                   <GithubIcon className="w-4 h-4" />
                   <span>GitHub</span>

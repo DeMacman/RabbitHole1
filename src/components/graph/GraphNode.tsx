@@ -30,9 +30,9 @@ function GraphNode({ data, selected }: NodeProps) {
   return (
     <div
       className={`
-        relative px-3 py-2 sm:px-4 sm:py-2.5 rounded-full border bg-white
+        relative px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-full border bg-white
         transition-all duration-300 cursor-pointer
-        max-w-[180px] sm:max-w-[220px]
+        max-w-[150px] sm:max-w-[220px]
         ${selected ? 'border-forest-500 shadow-lift' : 'border-navy-800/10'}
         hover:border-forest-400 hover:shadow-soft
       `}
@@ -42,7 +42,7 @@ function GraphNode({ data, selected }: NodeProps) {
       <Handle type="target" position={Position.Top} className="!bg-forest-400" />
       <Handle type="source" position={Position.Bottom} className="!bg-forest-400" />
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2">
         <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
         <span className="text-navy-900 text-xs sm:text-sm font-medium truncate">
           {label}

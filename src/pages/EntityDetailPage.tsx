@@ -88,22 +88,21 @@ export default function EntityDetailPage() {
 
   return (
     <div className="min-h-screen bg-cream-100 text-navy-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
         <a
           href="/"
-          className="inline-flex items-center text-navy-700/70 hover:text-forest-700 mb-6 sm:mb-8 transition-colors text-sm"
+          className="inline-flex items-center text-navy-700/70 hover:text-forest-700 mb-5 sm:mb-8 transition-colors text-sm"
         >
           <ArrowLeft className="w-4 h-4 mr-1.5" />
           Back to search
         </a>
 
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-          {/* Editorial header */}
           <div className="max-w-4xl">
             <p className="text-xs sm:text-sm uppercase tracking-[0.2em] text-forest-600 mb-2">
               {entity.type}
             </p>
-            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-semibold text-navy-900 leading-tight mb-4 break-words">
+            <h1 className="font-display text-3xl sm:text-4xl md:text-6xl font-semibold text-navy-900 leading-tight mb-3 sm:mb-4 break-words">
               {entity.label}
             </h1>
             <p className="text-base sm:text-lg text-navy-700/80 leading-relaxed max-w-3xl break-words">
@@ -111,8 +110,7 @@ export default function EntityDetailPage() {
             </p>
           </div>
 
-          {/* External links */}
-          <div className="flex flex-wrap gap-4 mt-6 mb-10">
+          <div className="flex flex-wrap gap-3 sm:gap-4 mt-5 sm:mt-6 mb-8 sm:mb-10">
             {entity.wikipediaUrl && (
               <a
                 href={entity.wikipediaUrl}
@@ -140,18 +138,16 @@ export default function EntityDetailPage() {
           </div>
         </motion.div>
 
-        {/* Main content: left info, right graph */}
-        <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-8 items-start mt-4">
-          {/* Left: details and information */}
+        <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-6 sm:gap-8 items-start mt-2">
           <motion.div
             initial={{ opacity: 0, x: -10 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: '-60px' }}
             transition={{ duration: 0.5 }}
-            className="space-y-6"
+            className="space-y-5 sm:space-y-6"
           >
-            <div className="bg-white border border-navy-800/10 rounded-card p-6 shadow-soft">
-              <h2 className="font-display text-xl sm:text-2xl font-semibold text-navy-900 mb-4">
+            <div className="bg-white border border-navy-800/10 rounded-card p-5 sm:p-6 shadow-soft">
+              <h2 className="font-display text-lg sm:text-2xl font-semibold text-navy-900 mb-3 sm:mb-4">
                 Details
               </h2>
               <dl className="space-y-3 text-sm text-navy-700/80">
@@ -170,7 +166,7 @@ export default function EntityDetailPage() {
                       {entity.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-cream-100 border border-navy-800/10 text-xs text-navy-700"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-cream-100 border border-navy-800/10 text-xs text-navy-700"
                         >
                           <Tag className="w-3 h-3 text-forest-600" />
                           {tag}
@@ -201,7 +197,6 @@ export default function EntityDetailPage() {
             </div>
           </motion.div>
 
-          {/* Right: knowledge graph */}
           <motion.div
             initial={{ opacity: 0, x: 10 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -209,7 +204,7 @@ export default function EntityDetailPage() {
             transition={{ duration: 0.5 }}
             className="w-full min-w-0"
           >
-            <h2 className="font-display text-xl sm:text-2xl font-semibold text-navy-900 mb-4">
+            <h2 className="font-display text-lg sm:text-2xl font-semibold text-navy-900 mb-3 sm:mb-4">
               Interactive Knowledge Graph
             </h2>
             {graphLoading ? (
@@ -217,12 +212,12 @@ export default function EntityDetailPage() {
             ) : graph ? (
               <>
                 <GraphLegend />
-                <div className="mt-4">
+                <div className="mt-3 sm:mt-4">
                   <GraphCanvas data={graph} />
                 </div>
               </>
             ) : (
-              <div className="p-6 sm:p-8 bg-white border border-navy-800/10 rounded-card text-center text-navy-700/70">
+              <div className="p-5 sm:p-8 bg-white border border-navy-800/10 rounded-card text-center text-navy-700/70">
                 No connections found for this entity.
               </div>
             )}
