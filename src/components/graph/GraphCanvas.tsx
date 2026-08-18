@@ -36,29 +36,17 @@ interface GraphData {
   edges: RelationshipEdge[];
 }
 
-const nodeTypes = {
-  custom: GraphNode,
-};
+const nodeTypes = { custom: GraphNode };
+const edgeTypes = { custom: GraphEdge };
 
-const edgeTypes = {
-  custom: GraphEdge,
-};
-
-export default function GraphCanvas({
-  data,
-}: {
-  data: GraphData;
-}) {
+export default function GraphCanvas({ data }: { data: GraphData }) {
   const navigate = useNavigate();
 
   const initialNodes: Node[] = useMemo(() => {
     const centerNode: Node = {
       id: data.center.id,
       type: 'custom',
-      position: {
-        x: 400,
-        y: 300,
-      },
+      position: { x: 400, y: 300 },
       data: {
         label: data.center.label,
         type: data.center.type,
@@ -69,13 +57,8 @@ export default function GraphCanvas({
     const neighborNodes: Node[] = data.nodes
       .filter((n) => n.id !== data.center.id)
       .map((entity, index, filtered) => {
-        const angle =
-          filtered.length > 0
-            ? (2 * Math.PI * index) / filtered.length
-            : 0;
-
+        const angle = (2 * Math.PI * index) / filtered.length;
         const radius = 220;
-
         return {
           id: entity.id,
           type: 'custom',
@@ -100,35 +83,22 @@ export default function GraphCanvas({
       source: rel.source,
       target: rel.target,
       type: 'custom',
-      data: {
-        label: rel.relationshipType,
-      },
+      data: { label: rel.relationshipType },
       animated: false,
     }));
   }, [data]);
 
-  const [nodes, setNodes, onNodesChange] =
-    useNodesState(initialNodes);
-
-  const [edges, setEdges, onEdgesChange] =
-    useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   useEffect(() => {
     setNodes(initialNodes);
     setEdges(initialEdges);
-  }, [
-    initialNodes,
-    initialEdges,
-    setNodes,
-    setEdges,
-  ]);
+  }, [initialNodes, initialEdges, setNodes, setEdges]);
 
   const onNodeClick = useCallback(
     (_event: React.MouseEvent, node: Node) => {
-      const entity = data.nodes.find(
-        (e) => e.id === node.id
-      );
-
+      const entity = data.nodes.find((e) => e.id === node.id);
       if (entity?.slug) {
         navigate(`/entity/${entity.slug}`);
       }
@@ -138,21 +108,8 @@ export default function GraphCanvas({
 
   return (
     <div
-      className="
-        w-full
-        h-[400px]
-        sm:h-[500px]
-        bg-[#0F0F10]
-        border
-        border-[rgba(255,255,255,0.08)]
-        rounded-2xl
-        overflow-hidden
-        relative
-      "
-      style={{
-        maxWidth: '100%',
-        touchAction: 'none',
-      }}
+      className="w-full h-[420px] sm:h-[520px] bg-white border border-navy-800/10 rounded-card overflow-hidden"
+      style={{ maxWidth: '100%', touchAction: 'manipulation' }}
     >
       <ReactFlow
         nodes={nodes}
@@ -163,33 +120,14 @@ export default function GraphCanvas({
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
-        fitViewOptions={{
-          padding: 0.3,
-        }}
+        fitViewOptions={{ padding: 0.3 }}
         minZoom={0.2}
         maxZoom={1.5}
-        defaultViewport={{
-          x: 0,
-          y: 0,
-          zoom: 1,
-        }}
-        proOptions={{
-          hideAttribution: true,
-        }}
+        defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+        proOptions={{ hideAttribution: true }}
       >
-        <Background
-          color="rgba(255,255,255,0.03)"
-          gap={20}
-        />
-
-        <Controls
-          className="
-            !bg-[#0F0F10]
-            !border-[rgba(255,255,255,0.08)]
-            !text-white
-            !fill-white
-          "
-        />
+        <Background color="rgba(11,22,34,0.04)" gap={20} />
+        <Controls className="!bg-white !border-navy-800/10 !text-navy-700 !fill-navy-700" />
       </ReactFlow>
     </div>
   );
